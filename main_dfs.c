@@ -70,6 +70,7 @@ typedef struct
    Item data;
    List* neighbors;
 
+   int predecessor;
    eGraphColors color;
 } Vertex;
 
@@ -79,7 +80,6 @@ bool Vertex_HasNeighbors( Vertex* v )
 
    return v->neighbors;
 }
-
 
 /**
  * @brief Hace que cursor libre apunte al inicio de la lista de vecinos. Se debe
@@ -91,7 +91,6 @@ bool Vertex_HasNeighbors( Vertex* v )
 void Vertex_Start( Vertex* v )
 {
    assert( v );
-   assert( v->neighbors );
 
    List_Cursor_front( v->neighbors );
 }
@@ -153,7 +152,6 @@ Data Vertex_GetNeighborIndex( const Vertex* v )
    return List_Cursor_get( v->neighbors );
 }
 
-
 void Vertex_SetColor( Vertex* v, eGraphColors color )
 {
    v->color = color;
@@ -164,29 +162,20 @@ eGraphColors Vertex_GetColor( Vertex* v )
    return v->color;
 }
 
-void Vertex_SetDistance( Vertex* v, int distance )
-{
-}
-
-int Vertex_GetDistance( const Vertex* v )
-{
-}
-
 void Vertex_SetPredecessor( Vertex* v, int predecessor_idx )
 {
+   v->predecessor = predecessor_idx;
 }
 
 int Vertex_GetPredecessor( const Vertex* v )
 {
+   return v->predecessor;
 }
 
 int Vertex_GetData( const Vertex* v )
 {
    return v->data;
 }
-
-
-
 
 //----------------------------------------------------------------------
 //                           Graph stuff: 
@@ -490,51 +479,51 @@ int Graph_Size( Graph* g )
 
 
 //----------------------------------------------------------------------
-//                            BFS 
+//                          dfs_traverse()
 //----------------------------------------------------------------------
 
-void bfs( Graph* g, int start )
+void dfs_traverse( Graph* g, Vertex* v )
 {
-   for( int i = 0; i < Graph_GetLen( g ); ++i )
+   if( Vertex_HasNeighbors( v ) )
    {
-      Vertex* v = Graph_GetVertexByIndex( g, i );
-
-      Vertex_SetColor( v, WHITE );
-   }
-
-   Vertex_SetColor( Graph_GetVertexByKey( g, start ), GRAY );
-
-   Queue* q = Queue_New( 50 );
-
-   Queue_Enqueue( q, start );
-   while( ! Queue_IsEmpty( q ) )
-   {
-      int val = Queue_Dequeue( q );
-      Vertex* v = Graph_GetVertexByKey( g, val );
-
-      DBG_PRINT( "Processing vertex: %d: ", Vertex_GetData( v ) );
-
       for( Vertex_Start( v ); ! Vertex_End( v ); Vertex_Next( v ) )
       {
          Vertex* w = Graph_GetVertexByIndex( g, Vertex_GetNeighborIndex( v ).index );
 
          if( Vertex_GetColor( w ) == WHITE )
          {
-            DBG_PRINT( "%d->", Vertex_GetData( w ) );
+            DBG_PRINT( "Visiting vertex: (p:%d)->%d\n", Vertex_GetData( v ), Vertex_GetData( w ) );
 
             Vertex_SetColor( w, GRAY );
 
-            Queue_Enqueue( q, Vertex_GetData( w ) );
+            dfs_traverse( g, w );
          }
       }
-      DBG_PRINT( "\n" );
-
-      Vertex_SetColor( v, BLACK );
+      DBG_PRINT( "Returning to: %d\n", Vertex_GetData( v ) );
+   }
+   else
+   {
+      DBG_PRINT( "Vertex %d doesn't have any neighbors\n", Vertex_GetData( v ) );
    }
 
-   Queue_Delete( &q );
+   Vertex_SetColor( v, BLACK );
 }
 
+void dfs( Graph* g, int start )
+{
+   for( int i = 0; i < Graph_GetLen( g ); ++i )
+   {
+      Vertex* v = Graph_GetVertexByIndex( g, i );
+
+      Vertex_SetColor( v, WHITE );
+      Vertex_SetPredecessor( v, -1 );
+   }
+
+   Vertex_SetColor( Graph_GetVertexByKey( g, start ), GRAY );
+   DBG_PRINT( "Visiting start node: %d\n", start );
+
+   dfs_traverse( g, Graph_GetVertexByKey( g, start ) );
+}
 
 
 #define MAX_VERTICES 5
@@ -542,8 +531,8 @@ void bfs( Graph* g, int start )
 int main()
 {
    Graph* grafo = Graph_New( 
-                     MAX_VERTICES,            // cantidad máxima de vértices
-                     eGraphType_UNDIRECTED ); // será un grafo no dirigido
+         MAX_VERTICES,            // cantidad máxima de vértices
+         eGraphType_DIRECTED );   // será un grafo dirigido
 
 
    // crea los vértices. El orden de inserción no es importante
@@ -565,19 +554,16 @@ int main()
    Graph_Print( grafo, 0 );
    // imprime el grafo completo (esta versión no usa al segundo argumento)
 
-
-   bfs( grafo, 100 );
-   // lleva a cabo el recorrido en anchura
+   dfs( grafo, 100 );
 
    for( int i = 0; i < Graph_GetLen( grafo ); ++i )
    {
       Vertex* v = Graph_GetVertexByIndex( grafo, i );
 
-      printf( "[%d] (%d) -- Pred: %d, Dist: %d\n", 
+      printf( "[%d] (%d) -- Pred: %d\n", 
             i,
             Vertex_GetData( v ),
-            Vertex_GetPredecessor( v ),
-            Vertex_GetDistance( v ) );
+            Vertex_GetPredecessor( v ) );
    }
 
    Graph_Delete( &grafo );

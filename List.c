@@ -43,6 +43,8 @@ void List_Delete( List** p_list )
 
 void List_Push_back( List* list, int data, float weight )
 {
+   assert( list );
+   
    Node* n = new_node( data, weight );
    assert( n );
 
@@ -60,6 +62,7 @@ void List_Push_back( List* list, int data, float weight )
 
 void List_Pop_back( List* list )
 {
+   assert( list );
    assert( list->first );
    // ERR: no podemos borrar nada de una lista vacía
 
@@ -82,6 +85,8 @@ void List_Pop_back( List* list )
 
 bool List_Is_empty( List* list )
 {
+   assert( list );
+   
    return !list->first;
 }
 
@@ -96,6 +101,8 @@ bool List_Is_empty( List* list )
  */
 bool List_Find( List* list, int key )
 {
+   assert( list );
+   
    Node* start = list->first;
    while( start )
    {
@@ -118,33 +125,44 @@ bool List_Remove( List* list, int key )
 
 void List_Cursor_front( List* list )
 {
+   assert( list );
+
    list->cursor = list->first;
 }
 
 void List_Cursor_back( List* list )
 {
+   assert( list );
+   
    list->cursor = list->last;
 }
 
 bool List_Cursor_next( List* list )
 {
+   assert( list );
+   
    list->cursor = list->cursor->next;
    return list->cursor;
 }
 
 bool List_Cursor_prev( List* list )
 {
+   assert( list );
+   
    // terminar
    return false;
 }
 
 bool List_Cursor_end( List* list )
 {
+   assert( list );
+   
    return list->cursor == NULL;
 }
 
 Data  List_Cursor_get( List* list )
 {
+   assert( list );
    assert( list->cursor );
 
    return list->cursor->data;
