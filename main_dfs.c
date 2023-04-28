@@ -162,20 +162,36 @@ eGraphColors Vertex_GetColor( Vertex* v )
    return v->color;
 }
 
-void Vertex_SetPredecessor( Vertex* v, int predecessor_idx )
-{
-   v->predecessor = predecessor_idx;
-}
-
-int Vertex_GetPredecessor( const Vertex* v )
-{
-   return v->predecessor;
-}
-
 int Vertex_GetData( const Vertex* v )
 {
    return v->data;
 }
+
+void Vertex_SetPredecessor( Vertex* v, int predecessor_idx )
+{
+}
+
+int Vertex_GetPredecessor( const Vertex* v )
+{
+}
+
+void Vertex_SetDiscovery_time( Vertex* v, int time )
+{
+}
+
+int Vertex_GetDiscovery_time( const Vertex* v )
+{
+}
+
+void Vertex_SetFinish_time( Vertex* v, int time )
+{
+}
+
+int Vertex_GetFinish_time( const Vertex* v )
+{
+}
+
+
 
 //----------------------------------------------------------------------
 //                           Graph stuff: 
